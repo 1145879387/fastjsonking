@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.LinkedHashMultimap;
+import jdk.nashorn.internal.ir.Flags;
 
 import java.io.*;
 import java.util.*;
@@ -21,7 +22,7 @@ public class twoforjson {
 	//	这里记录了头结点的信息，方便以后的操作
 	static ArrayList<String> arrayLists = new ArrayList();
 	////    这里记录了多层map平级关系下父节点的值
-//	static StringBuffer mapjiedian = new StringBuffer();
+//	static StringBuffer mapjiedian = new StringBuffer();3
 //    这里记录了最终的结果，结果可以输出到文件中
 	static StringBuffer jieguo = new StringBuffer();
 	//	这里记录了结果信息，方便打印
@@ -50,12 +51,18 @@ public class twoforjson {
 	//	这里记录了头结点的信息，方便以后的操作
 	static ArrayList<String> jieguoarrayLists = new ArrayList();
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 //		这里主要对json进行详细的处理
 //		这里首先判断是否是json,如果是json里面又是否嵌套json
 		Scanner scanner = new Scanner(System.in);
-		System.out.println("json解析器By新零售公测版v1.1");
-		System.out.println("请输入jsons数据，回车后按0回车即可结束输入！");
+		System.out.println("Robotjson脚本转换器");
+		System.out.println("此脚本用于把postman报文里的json转换成可执行的robot脚本语言，产品通过输入规定内容，可自动生成部分robot脚本。");
+		System.out.println("源码已发放在git上，将根据大家的意见进行不定期更新");
+		System.out.println("https://github.com/1145879387/fastjsonking.git");
+		System.out.println("需要输入4个内容，1,Postman中的发送报文，2，Postman中的接受报文，3，生成测试脚本的目录名，4，报文的url。");
+		System.out.println("此外，可以动态配置数据库，需要粘贴数据库的URL,如果该URL存在，则选定指定的序号，如果URL不存在，则添加URL到配置文件中");
+		System.out.println("请输入Postman中发送报文的jsons数据，回车后按0回车即可结束输入！");
+		System.out.println("回车后按0是的原因是按0告诉程序我输入完了，应该有更好的技巧，见谅");
 		StringBuffer stringBufferd = new StringBuffer();
 		while (!scanner.hasNext("0")) {
 			stringBufferd.append(scanner.next());
@@ -67,17 +74,17 @@ public class twoforjson {
 //		System.out.println("请输入url地址");
 //		String s = scanner.nextLine();
 		StringBuffer fanhuijieguo = new StringBuffer();
-		System.out.println("请输入返回结果的json串");
+		System.out.println("请输入Postman中返回结果的json报文，回车后按0回车即可结束输入！");
 		while (!scanners.hasNext("0")) {
 			fanhuijieguo.append(scanners.next());
 		}
 		String string1 = fanhuijieguo.toString();
 //		这里输入URL和文件名
 		Scanner scannerwenjianjia = new Scanner(System.in);
-		System.out.println("请输入文件夹名称");
+		System.out.println("请输入文件夹名称,例：订单中心_查询接口");
 		String swen = scannerwenjianjia.nextLine();
 		StringBuffer wenjianjia = new StringBuffer(swen);
-		wenjianjia.insert(0, "(常江)");
+		wenjianjia.insert(swen.length(), "_V1");
 //		TODO https://blog.csdn.net/weixin_40335368/article/details/78628371
 		System.out.println(wenjianjia);
 		String kb = "D:\\RobotForJson";
@@ -93,7 +100,7 @@ public class twoforjson {
 			nextFile.mkdirs();
 			//mkdirs可以建立多级文件夹， 而mkdir()只能建立一级的文件夹，如果输入多级路径，则会返回false；
 		}
-		System.out.println("请输入url名称！");
+		System.out.println("请输入Postman中url名称！");
 		Scanner url = new Scanner(System.in);
 		String surl = url.nextLine();
 		int iurl = surl.lastIndexOf("/");
@@ -102,11 +109,26 @@ public class twoforjson {
 		String substring1url = spliturl.substring(i1+1, spliturl.length());
 		String substringurl = surl.substring(iurl, surl.length());
 		String wenjianming = substring1url+"interface.py";
-		String wenjiantxt = substring1url + ".txt";
+//		String wenjiantxt = substring1url + ".txt";
+		String wenjiantxt = swen+"正常用例.txt";
+		String wenjiantxts = swen+"异常用例.txt";
 		System.out.println("url是"+spliturl);
 		System.out.println("文件名是" + wenjianming);
 		System.out.println("后续参数是"+substringurl);
 		linkedHashMap.put("requestaddress", spliturl);
+//		这里对url进行了额外的处理
+		Scanner shujuku = new Scanner(System.in);
+		System.out.println("这里采取配置文件的方式对数据库进行了处理，请配置指定的配置文件到D盘根目录下！文件名为connsql.txt");
+		System.out.println("如果没有配置文件也可以手动输入数据库的URL链接地址！");
+		File file=new File("D:\\connsql.properties");
+		if (!file.exists()) {
+//			如果没有文件，那么就动态创建一个文件
+			file.createNewFile();
+//			}
+		} else {
+			System.out.println("文件存储在D:\\connsql.properties目录下！");
+		}
+		test01();
 //		TODO 这里只处理json嵌套Json的情况，如果是对jsonarray进行处理则需要加一个分支
 		System.out.println(string);
 //		TODO 这里无论是json还是jsonarray这么转换都不会出错，不过jsonarray转换成json的时候还需要用jsonarray特殊的方法
@@ -148,7 +170,7 @@ public class twoforjson {
 		arrayList.add("Variables         "+wenjianming);
 		arrayList.add("");
 		arrayList.add("*** Keywords ***");
-		arrayList.add("输入所有字段");
+		arrayList.add("message_001");
 //		这里问题很大，由于Linkedhashmap是在pinjie方法之后运行的，而array也在这个方法里运行，所以会冲突，这里lnked的大小是空值，这样是没有效果的
 //		arrayList.add(kula);
 		arrayList.add("    ${header}    create dictionary    Accept-Encoding=");
@@ -239,12 +261,31 @@ public class twoforjson {
 			for (Map.Entry<String, String> stringStringEntry : linkedHashMap.entrySet()) {
 				String s = stringStringEntry.getKey().trim();
 				String s1 = stringStringEntry.getValue().trim();
-				bufferedWriterpy.write(s + "=u'" + s1+"'");
-				bufferedWriterpy.newLine();
+				if (s.equals("sql_url")) {
+					bufferedWriterpy.write("#数据库");
+					bufferedWriterpy.newLine();
+					bufferedWriterpy.write(s + "=" + s1);
+					bufferedWriterpy.newLine();
+				} else {
+					if (s.equals("requestaddress")) {
+						bufferedWriterpy.write("#查询接口地址");
+						bufferedWriterpy.newLine();
+					} else {
+						if (s.contains("Cj_")) {
+							bufferedWriterpy.write("#报文体返回参数");
+							bufferedWriterpy.newLine();
+						} else {
+							bufferedWriterpy.write("#公共参数");
+							bufferedWriterpy.newLine();
+						}
+					}
+					bufferedWriterpy.write(s + "=u'" + s1+"'");
+					bufferedWriterpy.newLine();
+				}
 				System.out.println(stringStringEntry.getKey()+"值是"+stringStringEntry.getValue());
 			}
 			bufferedWriterpy.close();
-//			这里对测试用例的test里面的用例脚本进行操作
+//			这里对测试用例的test里面的用例脚本进行操作swen
 			BufferedWriter textwriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(nextFile, wenjiantxt)), "UTF-8"));
 			textwriter.write("*** Settings ***");
 			textwriter.newLine();
@@ -254,10 +295,12 @@ public class twoforjson {
 			textwriter.newLine();
 			textwriter.write("Resource          消息报文.txt");
 			textwriter.newLine();
+			textwriter.write("Resource          预置条件.txt");
+			textwriter.newLine();
 			textwriter.newLine();
 			textwriter.write("*** Test Cases ***");
 			textwriter.newLine();
-			textwriter.write("输入所有字段");
+			textwriter.write(swen+"-正常查询");
 			textwriter.newLine();
 			String biaozhiwei = "";
 			for (Map.Entry<String, String> stringStringEntry : linkedHashMap.entrySet()) {
@@ -266,12 +309,93 @@ public class twoforjson {
 					biaozhiwei += "${" + s + "}    ";
 				}
 			}
-			textwriter.write("    输入所有字段    "+biaozhiwei);
+			textwriter.write("    prepare_case001    ${sql_url}");
+			textwriter.newLine();
+			textwriter.write("    message_002    "+biaozhiwei);
 			textwriter.close();
+			BufferedWriter textwriteryichang = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(nextFile, wenjiantxts)), "UTF-8"));
+			textwriteryichang.write("*** Settings ***");
+			textwriteryichang.newLine();
+			textwriteryichang.write("Library           Selenium2Library");
+			textwriteryichang.newLine();
+			textwriteryichang.write("Library           requests");
+			textwriteryichang.newLine();
+			textwriteryichang.write("Resource          消息报文.txt");
+			textwriteryichang.newLine();
+			textwriteryichang.write("Resource          预置条件.txt");
+			textwriteryichang.newLine();
+			textwriteryichang.newLine();
+			textwriteryichang.write("*** Test Cases ***");
+			textwriteryichang.newLine();
+			textwriteryichang.write(swen+"-异常用例");
+			textwriteryichang.newLine();
+			textwriteryichang.write("    message_001    "+biaozhiwei);
+			textwriteryichang.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		BufferedWriter yuzhitiaojian = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(nextFile, "预置条件.txt")), "UTF-8"));
+		yuzhitiaojian.write("*** Settings ***");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("Library           DatabaseLibrary");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("Library           Selenium2Library");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("Library           requests");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("Library           RequestsLibrary");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("Library           Collections");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("*** Keywords ***");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("prepare_case001");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("    [Arguments]    ${sql_url}");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("    Connect To Database Using Custom Params    pymysql    ${sql_url}");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("    ${count}    query    ?");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("    log    ${count}");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("    Disconnect From Database");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.write("    [Return]    ${count}");
+		yuzhitiaojian.newLine();
+		yuzhitiaojian.close();
+		BufferedWriter luodishuju = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(nextFile, "落地数据.txt")), "UTF-8"));
+		luodishuju.write("*** Settings ***");
+		luodishuju.newLine();
+		luodishuju.write("Library           DatabaseLibrary");
+		luodishuju.newLine();
+		luodishuju.write("Library           Selenium2Library");
+		luodishuju.newLine();
+		luodishuju.write("Library           requests");
+		luodishuju.newLine();
+		luodishuju.write("Library           RequestsLibrary");
+		luodishuju.newLine();
+		luodishuju.write("Library           Collections");
+		luodishuju.newLine();
+		luodishuju.write("*** Keywords ***");
+		luodishuju.newLine();
+		luodishuju.write("prepare_case002");
+		luodishuju.newLine();
+		luodishuju.write("    [Arguments]    ${sql_url}");
+		luodishuju.newLine();
+		luodishuju.write("    Connect To Database Using Custom Params    pymysql    ${sql_url}");
+		luodishuju.newLine();
+		luodishuju.write("    ${count}    query    ?");
+		luodishuju.newLine();
+		luodishuju.write("    log    ${count}");
+		luodishuju.newLine();
+		luodishuju.write("    Disconnect From Database");
+		luodishuju.newLine();
+		luodishuju.write("    [Return]    ${count}");
+		luodishuju.newLine();
+		luodishuju.close();
 	}
+
 
 	private static void shuchumappinjie(LinkedHashMultimap<String, String> qiantao, String[] split2, String[] jieguosplit) {
 //		其中qiantao代表具体的嵌套关系，split2代表具体的值&，jieguosplit代表头结点信息
@@ -829,5 +953,75 @@ public class twoforjson {
 		}
 		return slashMatcher.start();
 	}
-}
+//	读取指定配置文件
+	/**
+	 * 基于输入流读取属性文件：Properties继承了Hashtable，底层将key/value键值对存储在集合中，
+	 * 通过put方法可以向集合中添加键值对或者修改key对应的value
+	 *
+	 * @throws IOException
+	 */
+	public static void test01() throws IOException {
+		FileInputStream fis = new FileInputStream("D:\\connsql.properties");
+		Properties props = new Properties();
+		props.load(new InputStreamReader(fis, "utf-8"));// 将文件的全部内容读取到内存中，输入流到达结尾
+		fis.close();// 加载完毕，就不再使用输入流，程序未主动关闭，需要手动关闭
+		System.out.println("配置文件中一共有" + props.size() + "条！");
+		int size = props.size();
+		Scanner shuru = new Scanner(System.in);
+		FileOutputStream oFile = new FileOutputStream("D:\\connsql.properties", true);
+		if (size == 0) {
+//			如果是0则说明配置文件里没有数据，需要手动输入数据
+			System.out.println("该配置文件里没有数据，需要手动输入数据！");
+			System.out.println("请输入要链接数据库的名字！以及具体归属于那个中心！数据库名建议不要输入相同的！例:清算中心_查询接口");
+			String s = shuru.nextLine();
+			System.out.println("请输入要链接数据库对应的URL！建议从别的PY文件中直接拖过来，双引号全部拖过来，避免出错");
+			Scanner king = new Scanner(System.in);
+			System.out.println("该url将被记录到connsql.properties文件中！");
+			String url = king.nextLine();
+			props.put(s, url);
+			System.out.println(s + "=" + url);
+			props.store(new OutputStreamWriter(oFile, "utf-8"), "db配置");
+			linkedHashMap.put("sql_url", url);
+		} else {
+//			如果配置文件中有数据，则遍历之前的数据，如果数据不存在，在重新输入记录即可
+			System.out.println("遍历属性文件");
+			Enumeration keys = props.propertyNames();
+			LinkedHashMultimap<Integer, String> linkedHashMultimap = LinkedHashMultimap.create();
+			int xuhao = 0;
+			while (keys.hasMoreElements()) {
+				String key = (String) keys.nextElement();
+				System.out.println(xuhao + "    " + key + "           " + props.getProperty(key));
+				linkedHashMultimap.put(xuhao, props.getProperty(key));
+				xuhao++;
+			}
+			System.out.println("请选择一个序号，这个序号对应的url将被写入到Py文件中！如果没有对应的URL，则输入一个不存在的序号！");
+			System.out.println("如果不小心输入了错误的数据，请到D:\\connsql.properties下手动进行更改！如果打开文件乱码，请务必切换到UTF-8编码！");
+			int i = shuru.nextInt();
+			Set<Map.Entry<Integer, String>> entries = linkedHashMultimap.entries();
+			boolean flag = true;
+			for (Map.Entry<Integer, String> entry : entries) {
+				if (entry.getKey().intValue() == i) {
+//					如果相等，则把该序号对应的URL写入
+					linkedHashMap.put("sql_url", entry.getValue());
+					flag = false;
+				}
+			}
+			if (flag) {
+//			如果到这里则说明没有符合要求的序号，那么需要重新输入！
+				System.out.println("请输入要链接数据库的名字！以及具体归属于那个中心！数据库名建议不要输入相同的！例:清算中心_查询接口");
+				Scanner kula = new Scanner(System.in);
+				String s = kula.nextLine();
+				System.out.println("请输入要链接数据库对应的URL！建议从别的PY文件中直接拖过来，双引号也要全部拖过来，避免出错");
+				Scanner king = new Scanner(System.in);
+				System.out.println("该url将被记录到connsql.properties文件中！");
+				String url = king.nextLine();
+				props.put(s, url);
+				System.out.println(s + "=" + url);
+				props.store(new OutputStreamWriter(oFile, "utf-8"), "db配置");
+				linkedHashMap.put("sql_url", url);
+			}
+		}
+		oFile.close();
+	}
+	}
 
